@@ -1,6 +1,6 @@
 # ARAMIS
 
-# PIPELINE TO CORRECT PACBIO ASSEMBLIES WITH ILLUMINA READS
+# Accurate long Reads Assemblies Method to correct Indel errors with Short reads.
 
 
 ## INTRODUCTION
