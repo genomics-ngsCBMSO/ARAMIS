@@ -32,13 +32,13 @@ This pipeline requires the following dependences:
 
 * [Pilon](https://github.com/broadinstitute/pilon)
 
-* [samtools](git clone git://github.com/samtools/samtools.git)
+* [samtools](https://github.com/samtools/samtools.git)
 
 * [python3](https://www.python.org/download/releases/3.0/)
 
 * [PacBio-utilities](https://github.com/douglasgscofield/PacBio-utilities)
 
-* [igvtools]
+* [igvtools](https://software.broadinstitute.org/software/igv/igvtools_commandline)
 
 * [seqkit](https://github.com/shenwei356/seqkit)
 
@@ -52,6 +52,7 @@ We recommend installing R packages manually.
 
 Enter R through your terminal and type:
 
+```
 install.packages("optparse")
 install.packages("ggplot2")
 install.packages("cowplot")
@@ -59,46 +60,59 @@ install.packages("grid")
 install.packages("epicontacts")
 install.packages("gridExtra")
 
+```
 
 ## INSTALLATION
 
 Make sure you have installed all the dependencies before try to run the pipeline!
 
-clone github #AÑADIR GITHUB CORRECTO Y NOMBRE DE CARPETA
-cd correction
+The downloaded folder contains 2 main scripts and a folder with all the additional scripts needed to do the complete pipeline:
 
-The downloaded folder contains 5 scripts needed to do the complete pipeline:
+*Main programs*
 
 * correction.sh (AKA D'Artagnan)
+* indel_analysis.sh (AKA Aramis)
+
+*scripts/ folder*
+
 * parser_pilon_bed.py (AKA Athos)
 * PilonCheck.py (AKA Porthos)
-* indel_analysis.sh (AKA Aramis)
 * combine_info.py (AKA Richelieu)
 * plot_generation.R (AKA Julieta)
 
-All of the scripts must be in the work directory without any change in their names. 
+All of the scripts must be located in /usr/local/bin and with execution permission:
+
+```
+cd ARAMIS/
+chmod -R +x ./
+sudo cp correction.sh indel_analysis.sh scripts/parser_pilon_bed.py scripts/PilonCheck.py scripts/combine_info.py scripts/plot_generation.R /usr/local/bin
+
+```
+
 
 The script correction.sh assumes that the path to the executables .jar files of Picard Tools and Pilon is:
 
-/home/User/software/picard.jar (or ~/software/picard.jar)
-/home/User/software/pilon.jar (or ~/software/pilon.jar)
+/home/$USER/picard.jar (or ~/picard.jar)
+/home/$USER/pilon.jar (or ~/pilon.jar)
 
-If this is not true, modify the correspondant lines in the script indicating the correct path for each software, or add them as parameters when running the pipeline.
+If this is not true, modify the correspondant lines in the script indicating the correct path for each software, 
+or add them as parameters when running the pipeline (--picard_path and --pilon_path)
+
 
 ## USAGE
 
 The input files needed to run the pipeline are:
 
-*PacBio assembly fasta file: De novo assembly obtained only with PacBio long reads in fasta format
-*Illumina alignment bam file: Alignment of short Illumina reads against the PacBio assembly in bam format. We recommend using BWA aligner.
-*PacBio alignment bam file: Alignment of long PacBio reads against the PacBio assembly in bam format. We recommend using Blasr aligner.
+* *PacBio assembly fasta file:* De novo assembly obtained only with PacBio long reads in fasta format
+* *Illumina alignment bam file:* Alignment of short Illumina reads against the PacBio assembly in bam format. We recommend using BWA aligner.
+* *PacBio alignment bam file:* Alignment of long PacBio reads against the PacBio assembly in bam format. We recommend using Blasr aligner.
 
 All of the input files for all the scripts MUST be in the work directory.  
 
-1 . Running the tests to correct the pacbio assembly file
+1. Running the tests to correct the pacbio assembly file
 
 ```
-./correction.sh  -a PacBio.fasta -b Illumina.bam -i 0.5 -p prefix
+correction.sh  -a PacBio.fasta -b Illumina.bam -i 0.5 -p prefix
 
 OPTIONS
     -a  | --assembly_file     PacBio assembly in Fasta format (REQUIRED)
@@ -109,6 +123,8 @@ OPTIONS
     -w  | --warnings          Alternative pipeline after manual correction of indels flags as warning
     -p  | --prefix            Prefix for output files
     -h  | --help              Display help
+
+```
 
 This step will generate 3 folders:
 
@@ -124,28 +140,28 @@ This step will generate 3 folders:
     - targets_final_sorted_prefix.txt: Final targets that passed the indel fraction threshold and were corrected in the genome assembly
     - manual_correction_pilon_not_common_indelfraction.txt: List of positions where indels were detected but not corrected as they didn't pass all the filters
     - warnings.txt: List of positions where indels were detected and corrected, but marked as warnings for possible second correction after manual checking
-    - not_warnings ???? BORRAMOS?
-    - targets_only_good.txt ???? BORRAMOS?
-    - targets_only_bad.txt ???? BORRAMOS?
+    - not_warning.txt: List of positions where indels were detected and corrected. Not necessary manual correction
+    - targets_only_good.txt: List of positions flagged as good by pacbio-utilities directly
+    - targets_only_bad.txt: List of positions flagged as bad by pacbio-utilities and thus check with Pilon
 
-```
+
 
 2. Running a second additional correction after modifiying the generate warnings file (OPTIONAL)
 
 ```
-
-./correction.sh -a PacBio.fasta -b Illumina.bam -i 0.5 -w warnings.txt -p prefix
+correction.sh -a PacBio.fasta -b Illumina.bam -i 0.5 -w warnings.txt -p prefix
+```
 
 This step will generate 1 folder
 
     - pacbio_final_withwarnings_prefix.fasta: New genome assembly in fasta format generated after the second correction   
 
-```
+
 
 3. Running the tests to generate coverage, gc-skew and homopolymers statistics with their plots
 
 ```
-./indel_analysis.sh -a <PacBio assembly fasta file> -b1 <Illumina alignment bam file> -b2 <PacBio alignment bam file> -p <prefix for output files> -t <targets file>
+indel_analysis.sh -a <PacBio assembly fasta file> -b1 <Illumina alignment bam file> -b2 <PacBio alignment bam file> -p <prefix for output files> -t <targets file>
 
 OPTIONS
     -a  | --assembly_file             PacBio assembly in Fasta format
@@ -154,6 +170,8 @@ OPTIONS
     -p  | --prefix                    Prefix for output files
     -t  | --targets_file              Target file generated by correction.sh
     -h  | --help                      Display help
+    
+```
 
 This step will generate 1 folder
 
@@ -189,4 +207,4 @@ a joint Center between the Consejo Superior de Investigaciones Científicas (CSI
 
 ## Acknowledgments
 
-*Agradecimientos del paper
+* Agradecimientos del paper
