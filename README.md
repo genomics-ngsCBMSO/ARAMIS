@@ -1,8 +1,5 @@
 # ARAMIS
 
-# Accurate long Reads Assemblies Method to correct Indel errors with Short reads.
-
-
 ## INTRODUCTION
 
 PacBio long reads can be used to generate de novo genome assemblies. However, we have noticed small insertions
@@ -93,6 +90,7 @@ sudo cp correction.sh indel_analysis.sh scripts/parser_pilon_bed.py scripts/Pilo
 The script correction.sh assumes that the path to the executables .jar files of Picard Tools and Pilon is:
 
 /home/$USER/picard.jar (or ~/picard.jar)
+
 /home/$USER/pilon.jar (or ~/pilon.jar)
 
 If this is not true, modify the correspondant lines in the script indicating the correct path for each software, 
@@ -103,9 +101,9 @@ or add them as parameters when running the pipeline (--picard_path and --pilon_p
 
 The input files needed to run the pipeline are:
 
-* *PacBio assembly fasta file:* De novo assembly obtained only with PacBio long reads in fasta format
-* *Illumina alignment bam file:* Alignment of short Illumina reads against the PacBio assembly in bam format. We recommend using BWA aligner.
-* *PacBio alignment bam file:* Alignment of long PacBio reads against the PacBio assembly in bam format. We recommend using Blasr aligner.
+* #PacBio assembly fasta file:# De novo assembly obtained only with PacBio long reads in fasta format
+* #Illumina alignment bam file:# Alignment of short Illumina reads against the PacBio assembly in bam format. We recommend using BWA aligner.
+* #PacBio alignment bam file:# Alignment of long PacBio reads against the PacBio assembly in bam format. We recommend using Blasr aligner.
 
 All of the input files for all the scripts MUST be in the work directory.  
 
@@ -128,14 +126,14 @@ OPTIONS
 
 This step will generate 3 folders:
 
-* picard
+* picard/
     - duplicate_prefix_PacBiovsIllumina_readGroup.bam: Output of the pre-proccesing of the alignment
     - duplicate_prefix_PacBiovsIllumina_readGroup.bai: Index of bam file. Neccesary if you want to visualize the files in Genome Browers as IGV
 
-* pilon
+* pilon/
     - prefix.pilon.changes.bed: Tabular file including the indel errors in the PacBio Assembly detected by PILON software
 
-* pacbio_utilities
+* pacbio_utilities/
     - pacbio_final_prefix.fasta: Final corrected genome aasembly in fasta format 
     - targets_final_sorted_prefix.txt: Final targets that passed the indel fraction threshold and were corrected in the genome assembly
     - manual_correction_pilon_not_common_indelfraction.txt: List of positions where indels were detected but not corrected as they didn't pass all the filters
@@ -150,6 +148,7 @@ This step will generate 3 folders:
 
 ```
 correction.sh -a PacBio.fasta -b Illumina.bam -i 0.5 -w warnings.txt -p prefix
+
 ```
 
 This step will generate 1 folder
@@ -187,7 +186,6 @@ This step will generate 1 folder
     - Indel_fraction_cromosoma.pdf: Plot representing the indel fraction of the Illumina alignment and the PacBio alignment 
     - prefix_allinfo.txt: Tabular file including all the information calculated for each position where an indel was detected and corrected
 
-```
 
 ## MAINTAINERS
 
