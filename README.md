@@ -1,5 +1,7 @@
 # ARAMIS
 
+# Accurate long Reads Assemblies Method to correct Indel errorS
+
 ## INTRODUCTION
 
 PacBio long reads can be used to generate de novo genome assemblies. However, we have noticed small insertions
@@ -151,9 +153,9 @@ This step will generate 3 folders:
 correction.sh -a PacBio.fasta -b Illumina.bam -i 0.5 -w warnings.txt -p prefix
 ```
 
-This step will generate 1 folder
+This step will generate 1 folder:
 
-    - pacbio_final_withwarnings_prefix.fasta: New genome assembly in fasta format generated after the second correction   
+   - pacbio_final_withwarnings_prefix.fasta: New genome assembly in fasta format generated after the second correction   
 
 
 
