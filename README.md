@@ -101,9 +101,10 @@ or add them as parameters when running the pipeline (--picard_path and --pilon_p
 
 The input files needed to run the pipeline are:
 
-* # PacBio assembly fasta file: # De novo assembly obtained only with PacBio long reads in fasta format
-* # Illumina alignment bam file: # Alignment of short Illumina reads against the PacBio assembly in bam format. We recommend using BWA aligner.
-* # PacBio alignment bam file: # Alignment of long PacBio reads against the PacBio assembly in bam format. We recommend using Blasr aligner.
+* **PacBio assembly fasta file:** De novo assembly obtained only with PacBio long reads in fasta format
+* **Illumina alignment bam file:** Alignment of short Illumina reads against the PacBio assembly in bam format. We recommend using BWA aligner.
+* **PacBio alignment bam file:** Alignment of long PacBio reads against the PacBio assembly in bam format. We recommend using Blasr aligner.
+
 
 
 All of the input files for all the scripts MUST be in the work directory.  
