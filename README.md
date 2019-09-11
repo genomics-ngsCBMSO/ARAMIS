@@ -105,8 +105,6 @@ The input files needed to run the pipeline are:
 * **Illumina alignment bam file:** Alignment of short Illumina reads against the PacBio assembly in bam format. We recommend using BWA aligner.
 * **PacBio alignment bam file:** Alignment of long PacBio reads against the PacBio assembly in bam format. We recommend using Blasr aligner.
 
-
-
 All of the input files for all the scripts MUST be in the work directory.  
 
 1. Running the tests to correct the pacbio assembly file
@@ -148,9 +146,9 @@ This step will generate 3 folders:
 
 2. Running a second additional correction after modifiying the generate warnings file (OPTIONAL)
 
+
 ```
 correction.sh -a PacBio.fasta -b Illumina.bam -i 0.5 -w warnings.txt -p prefix
-
 ```
 
 This step will generate 1 folder
