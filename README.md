@@ -1,6 +1,6 @@
 # ARAMIS
 
-# Accurate long Reads Assemblies Method to correct Indel errorS
+# Accurate long-Reads Assembly correction Method for Indel errorS
 
 ## INTRODUCTION
 
