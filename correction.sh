@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ARAMIS_PATH='/usr/local/bin/'
+ARAMIS_PATH='~/'
 PICARD_PATH='~/picard.jar'
 PILON_PATH='~/pilon-1.22.jar'
 
@@ -11,14 +11,14 @@ usage()
     echo "In case you want to perform manual correction of warning targets, please run Usage2"
     echo "Usage2: $0 -a <ASSEMBLY_FILE> -w  <WARNINGS> -p <PREFIX>"
     echo -e "\n"
-    echo "  -a | --assembly_file     PacBio assembly in Fasta format (REQUIRED)"
-    echo "  -b | --alignment_file    Input alignment in BAM (sorted) format (REQUIRED)"
-    echo "  -i | --indel_fraction     Do not report indels at a position if the fraction of reads containing them is below FLOAT"
-    echo " -pt | --picard_path   If picard.jar is not in the path /home/$USER , please indicate the correct path with this option "  
-    echo " -pl | --pilon_path    If pilon.jar is not in the path /home/$USER , please indicate the correct path with this option " 
-    echo "  -w | --warnings      Alternative pipeline after manual correction of indels flags as warning."
-    echo "  -p | --prefix    Prefix for output files"
-    echo "  -h | --help    Display help"
+    echo "  -a | --assembly_file    PacBio assembly in Fasta format (REQUIRED)"
+    echo "  -b | --alignment_file   Input alignment in BAM (sorted) format (REQUIRED)"
+    echo "  -i | --indel_fraction   Do not report indels at a position if the fraction of reads containing them is below FLOAT"
+    echo " -pt | --picard_path      If picard.jar is not in the path /home/$USER, please indicate the correct path with this option"  
+    echo " -pl | --pilon_path       If pilon.jar is not in the path /home/$USER, please indicate the correct path with this option" 
+    echo "  -w | --warnings         Alternative pipeline after manual correction of indels flags as warning."
+    echo "  -p | --prefix           Prefix for output files"
+    echo "  -h | --help             Display help"
 
 }
 
@@ -260,11 +260,6 @@ python3 ${ARAMIS_PATH}PilonCheck.py ${PREFIX}_pilon.changes.bed targets_onlybad_
 sed '2,$d' targets_All_${INDEL_FRAC}.txt > header
 cat targets_onlygood_${INDEL_FRAC}.txt pilon_common.txt | sort -k2,2n > targets_final_${PREFIX}.txt
 
-#Additional filtering of pilon_not_common.txt
-
-awk -v infr=$INDEL_FRAC 'BEGIN{FS=OFS="\t"} $7>=infr' pilon_not_common.txt > manual_correction_pilon_not_common_${INDEL_FRAC}.txt
-
-
 #create list file with contigs names.
 grep '>' $ASSEMBLY |sed 's/>//g' > list.txt
 
@@ -311,7 +306,7 @@ echo "
 "
 
 #Generating correcting fasta.
-pacbio-util indel-apply -f $ASSEMBLY -t targets_final_${PREFIX}_sorted.txt --include-bad-indels > pacbio_final_${PREFIX}.fasta 2>pacbioUtilities_log.txt
+/usr/local/bin/pacbio-util indel-apply -f $ASSEMBLY -t targets_final_${PREFIX}_sorted.txt --include-bad-indels > pacbio_final_${PREFIX}.fasta 2>pacbioUtilities_log.txt
 
 	if [[ $? != 0 ]]; then 
 		echo "ERROR TRYING TO EXECUTE PACBIO-UTILITIES: indel-apply!! For more information see pacbioUtilities_log.txt"
