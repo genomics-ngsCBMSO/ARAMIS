@@ -8,7 +8,7 @@ import math
 import re
 
 syntax = '''----------------------------------------------------------------------------
-	Description
+	Description: Script to parse Pilon changes output file to a bed file.
 
         #Usage: python3 parser_pilon_bed.py <pilon.changes_file>
 
@@ -53,6 +53,7 @@ for line in lines:
   outhandle.write(data)
     
 inhandle.close()
+outhandle.close()
 
 print("\n\tOutput file generated: ", out_file, "\n")
 print("ALL DONE!!!")
