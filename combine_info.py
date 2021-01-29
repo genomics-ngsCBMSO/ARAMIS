@@ -11,20 +11,21 @@ import fileinput
 import subprocess
 
 syntax = '''----------------------------------------------------------------------------
-	Description
+	Description: Script to combine all the information about the corrected errors 
+	obtained in previous steps from the script indel_analysis.sh
 
         #Usage: python3 combine_info.py <file_list> <out_file>
 
-        	file_list : Tabular file indicating all the results files generated in previous steps
-			The list MUST have the following structure:
+        file_list : Tabular file indicating all the results files generated in previous steps
+	The list MUST have the following structure:
 
-			Indels				<indels_file>
-			Illumina_coverage		<Illumina_coverage_file>
-			PacBio_coverage			<PacBio_coverage_file>
-			Homopolymers_file		<Homopolymers_file>
-			GCSkew_file			<gc_skew_file>
+		Indels			<indels_file>
+		Illumina_coverage	<Illumina_coverage_file>
+		PacBio_coverage		<PacBio_coverage_file>
+		Homopolymers_file	<Homopolymers_file>
+		GCSkew_file		<gc_skew_file>
 
------------------------------------------------------------------------------'''
+-----------------------------------------------------------------------------------------'''
 
 if len(sys.argv) != 3:
   print (syntax)
@@ -82,7 +83,9 @@ for line in lines:
     pos = int(chunk[1])
     change = chunk[8]
     pos_dic[chro][pos]['change'] = change
-    indel_count = indel_count + 1      
+    indel_count = indel_count + 1     
+
+inhandle1.close() 
 
 print("\t","Number of indels = ", indel_count, "\n")
 
@@ -109,6 +112,8 @@ for line in lines:
     covilu_dic[chro][pos]['ins'] = ins
     covilu_dic[chro][pos]['dels'] = dels
 
+inhandle2.close()
+
 #Read PacBio IgvTools count output file
 
 print(" Reading PacBio coverage information \n")
@@ -132,6 +137,7 @@ for line in lines:
     covpb_dic[chro][pos]['ins'] = ins
     covpb_dic[chro][pos]['dels'] = dels
 
+inhandle3.close()
 
 #Read Homopolymers file
 
@@ -165,6 +171,8 @@ for line in lines:
     hom_dic[chro][pos]['lgth'] = lgth
     hom_dic[chro][pos]['end'] = end
     hom_count = hom_count + 1
+
+inhandle4.close()
 
 print("\t", "Number of homopolymers: ", hom_count, "\n")
 
@@ -230,17 +238,10 @@ col2 = [hom_count, indel_count, homyes_count, ((homyes_count/hom_count)*100), A_
 writer = csv.writer(outhandle3, delimiter='\t')
 writer.writerows(zip(col1,col2))
 
-
-#Graphics with R
-print("..............................................................................")
-print(" Now, let's generate some plots with R \n\n")
-
-#subprocess.call (["/usr/bin/Rscript", "--vanilla", "../homopolymeros.R","-f", out_file1, "-l", "list_chro", "-c", "tempcoverage.txt", "-g", gcs_file ])
-#os.system("rm tempcoverage.txt Rplots.pdf")
+outhandle1.close()
+outhandle2.close()
+outhandle3.close()
 
 #That's all
 
 print(" Output files generated:", out_file1,"+ stats.txt + plots")
-#print("\n ....ALL DONE!!!...\n")
-
-
