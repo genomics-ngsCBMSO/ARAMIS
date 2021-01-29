@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-##CLEAN AND LIBRARIES
+##CLEAN AND CHECK LIBRARIES
 
 
 print(" Checking if all libraries are installed ")
@@ -132,15 +132,6 @@ for (i in 1:nrow(size)) {
   ggsave(filename=paste("Indel_fraction_",var,".png", sep=""), plot=out2, device="png", width = 15, height = 8, dpi=352)
   ggsave(filename=paste("Indel_fraction_",var,".pdf", sep=""), plot=out2, device="pdf", width = 15, height = 8, dpi=352)
 }
-
-
-##INTENTO PLOT
-#nona <- subset(chro, !is.na(Type))
-#out <- ggplot(nona, aes(x=Position, colour=Homopolymer)) + xlim(0, genome.size)
-#out <- out + geom_density(adjust=0.1, size=0.8)
-#out <- out + labs(x="Nucleotide position", title="") 
-#ggsave(filename=paste("Indels_and_G4_lines",var,".png",sep=""), plot=out, device="png", width = 15, height = 8, dpi=352)
-
 
 print(" All plots done!!! ")
 
