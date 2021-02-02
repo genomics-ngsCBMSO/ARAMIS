@@ -137,7 +137,6 @@ This step will generate 3 folders:
 * pacbio_utilities/
     - pacbio_final_prefix.fasta: Final corrected genome aasembly in fasta format 
     - targets_final_sorted_prefix.txt: Final targets that passed the indel fraction threshold and were corrected in the genome assembly
-    - manual_correction_pilon_not_common_indelfraction.txt: List of positions where indels were detected but not corrected as they didn't pass all the filters
     - warnings.txt: List of positions where indels were detected and corrected, but marked as warnings for possible second correction after manual checking
     - not_warning.txt: List of positions where indels were detected and corrected. Not necessary manual correction
     - targets_only_good.txt: List of positions flagged as good by pacbio-utilities directly
