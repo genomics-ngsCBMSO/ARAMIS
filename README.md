@@ -13,7 +13,7 @@ Thus, we have developed a collection of scripts to detect and correct those erro
 Here we described the pipeline we recommend in order to obtain a new corrected assembly in fasta format.  
 
  * For a full description of the module, visit the project page:
-   paper
+   Unpublished yet.
 
  * To submit bug reports and feature suggestions, or to track changes:
    genomicangs@cbm.csic.es
