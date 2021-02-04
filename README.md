@@ -205,6 +205,6 @@ a joint Center between the Consejo Superior de Investigaciones Científicas (CSI
 
 ## Acknowledgments
 
-The authors appreciate the advice and helpful comments received from members of the Genomics and NGS Core Facility (GENGS, http://genomics-ngs.cbm.uam.es/) at the Centro de Biología Molecular Severo Ochoa (CBMSO, CSIC-UAM) which is part of the CEI UAM+CSIC, Madrid, Spain. Genome sequence data from European Nucleotide Archive (ENA) were invaluable for this work and their provision in the public domain is gratefully acknowledged. The authors thanks especially all the staff members of Dr Requena, Dr Amils and Dr Berenguer laboratories at the CBMSO. 
+The authors appreciate the advice and helpful comments received from members of the Genomics and NGS Core Facility (GENGS, http://genomics-ngs.cbm.uam.es/) at the Centro de Biología Molecular Severo Ochoa (CBMSO, CSIC-UAM) which is part of the CEI UAM+CSIC, Madrid, Spain. Genome sequence data from European Nucleotide Archive (ENA) were invaluable for this work and their provision in the public domain is gratefully acknowledged. The authors thank all the staff members of Dr Berenguer, Dr Requena and Dr Amils laboratories at the CBMSO, especially Dr Alba Blesa, Dr Mercedes Sanchez, Esther Camacho and Jose Manuel Martínez. Computational time from the Centro de Computación Científica (CCC) of Universidad Autónoma de Madrid is also gratefully acknowledged.
 
 
