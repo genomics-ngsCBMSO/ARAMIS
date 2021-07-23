@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ARAMIS_PATH='/usr/local/bin/'
+ARAMIS_PATH='/programas/ARAMIS'
 
 usage()
 {

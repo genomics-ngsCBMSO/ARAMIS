@@ -1,0 +1,460 @@
+#!/usr/bin/env perl
+
+# Copyright (c) 2015 Douglas G. Scofield, Uppsala University
+# douglasgscofield@gmail.com
+#
+# No warranty is implied or assumed by this code.  Covered by
+# the Gnu General Public License v2.  See LICENSE.
+#
+# Please send bugs, suggestions etc.
+#
+# Note: samtools >= 0.1.19 required for its --ff flag
+#
+# Changelog:
+#
+# 0.2 : added check of samtools version (20151201)
+# initial version unversioned
+
+use constant VERSION => '0.2';
+
+use strict;
+use warnings;
+# base modules
+use POSIX;
+use Getopt::Long;
+# BioPerl modules
+use Bio::Seq;
+use Bio::SeqIO;
+
+my $o_verbose = 0;
+
+sub print_usage_and_exit($$);
+sub merge_pileup_columns($);
+sub indel_targets();
+sub indel_apply();
+
+################
+# main loop
+
+my %command_values = ( "indel-targets" => "indel-targets",
+                       "indel-apply"   => "indel-apply");
+my $command = shift @ARGV;
+
+if (not defined $command or not defined $command_values{$command}) {
+    print STDERR "$0 indel-targets ...\n";
+    print STDERR "$0 indel-apply ...\n";
+    print STDERR "\nVersion: ".VERSION."\n";
+    exit 0;
+} elsif ($command eq "indel-targets") {
+    indel_targets();
+} elsif ($command eq "indel-apply") {
+    indel_apply();
+}
+
+################
+
+sub print_usage_and_exit($$) {
+    my $usage = shift;
+    my $msg = shift;
+    print "$msg\n" if $msg;
+    print $usage;
+    exit 0;
+}
+
+################
+
+my $do_merge = 0;
+sub merge_pileup_columns($) {
+    # each BAM has 4 columns: coverage, bases, quality, mapping quality
+    # if coverage is 0 *and* the next two are '*', then there are only
+    # three columns.  if the *and* is not true, then reads have been
+    # removed because of flags, and there are 4 columns of output
+    my $l = shift;  # reference to array of pileup columns
+    my ($cvg, $base, $qual, $mapqual) = ( 0, "", "", "" );
+    my ($n_cols, $n_bams) = ( scalar(@$l), 0 );
+    my $i = 3; # start at 4th column (coverage)
+    while ($i < $n_cols) {
+        if ($l->[$i] > 0) {  # coverage > 0, 4 columns
+            $cvg     += $l->[$i];
+            $base    .= $l->[$i + 1];
+            $qual    .= $l->[$i + 2];
+            $mapqual .= $l->[$i + 3];
+            $i += 4;
+        } elsif ($l->[$i] == 0 and $l->[$i + 1] eq '*' and $l->[$i + 2] eq '*') {
+            if ($l->[$i + 3] eq '*') {
+                # samtools 1.0+
+                $i += 4;
+            } else {
+                # pre-samtools 1.0, this was a bug, with coverage 0 there are just 3 columns
+                $i += 3;
+            }
+        } else {  # coverage 0 but 4 columns
+            $i += 4;
+        }
+        ++$n_bams;
+    }
+    if (not $do_merge) {
+        print STDERR "Merging columns from $n_bams BAM files ...\n" if $o_verbose;
+        $do_merge = 1;
+    }
+    return ($l->[0], $l->[1], $l->[2], $cvg, $base, $qual, $mapqual);
+}
+
+################
+
+sub indel_targets() {
+    my $o_fasta = "";
+    my $o_stdin;
+    my %mode_values = ( "filter" => "filter", "model" => "model");
+    my $o_mode = "filter";
+    my $o_indelfrac = 0.80;
+    my $o_indelmincov = 10;
+    my $o_includebadindels = 0;
+    my $o_maxindelsize = 1000;
+    my $o_mappingquality = 0;
+    my $mapQ_base = 33;
+    my $o_help = 0;
+    my $o_samtools;
+    my $o_allreads;
+    my $min_mapqual = 1;
+    my $min_basequal = 13;
+    my $samtools_filterflags = "--ff ".(256 + 1024);  # not primary, is duplicate
+    my $o_allbases;
+    my $samtools = "samtools";
+    my $n_targets = 0;
+
+    my $usage = "
+$0 indel-targets -f FASTA FILE1.bam [ FILE2.bam ... ]
+
+Version: ".VERSION."
+
+Generats indel targets for correction.  Uses samtools for indel detection.
+Targets are written to standard output.
+
+Targets will only be generated where all read mappings containing an indel
+agree on the size and sequence of the indel.  Further criteria for minimum
+indel fraction, minimum coverage, and maximum indel size may be adjusted via
+options.
+
+The first line of the targets output is the name of the assembly Fasta file
+against which the targets were generated.  Following that, the columns are
+scaffold name, target position, reference base, total read coverage, type of
+target (always 'indel' for this command), whether the target passed quality
+criteria (`good` or `bad`), the frequency of coverage supporting the indel, the
+size of the indel (positive for insertion, negative for deletion), a string
+describing the indel size and sequence, the number of reads supporting the
+indel, and the mean mapping quality of reads.
+
+OPTIONS
+
+    -f FILE, --fasta FILE    PacBio assembly in Fasta format
+
+    FILE1.bam [ FILE2.bam ]  BAM files of reads mapped to
+
+    -                        Read mpileup from stdin rather than running
+                             samtools. Note that mapping qualities
+                             (option `-s`) are expected in the mpileup input.
+
+    --mode model | filter    Determine indel targets using a probabilistic
+                             model (not yet implemented!) or naive filtering,
+                             which is what we currently do.
+
+    NAIVE-MODE OPTIONS
+
+    --indel-frac FLOAT       Do not report indels at a position if the
+                             fraction of reads containing them is below FLOAT
+                             [default $o_indelfrac]
+    --indel-min-cov INT      Minimum read coverage to consider an indel
+                             [default $o_indelmincov]
+    --include-bad-indels     Include indels in target set that do not pass
+                             our criteria, these lines are marked 'bad' in
+                             the sixth column
+    --max-indel-size INT     Maximum indel size to accept, beyond this the
+                             position is considered in error [default $o_maxindelsize]
+    --mapping-quality FLOAT  Minimum mean mapping quality of reads covering a
+                             target site. Note that a value of 0 means no
+                             minimum applied; reads with 0 mapQ are still
+                             excluded by default (see --all-reads) [default $o_mappingquality]
+    --all-reads              Include all reads.  Default is to exclude
+                             multiply-mapped reads (mapQ < $min_mapqual), alignments
+                             that are not the primary (SAM flag 256), and
+                             duplicate alignments (flag 1024).
+    --all-bases              Include all bases.  Default is to exclude bases
+                             below quality $min_basequal.
+
+    GENERAL OPTIONS
+
+    --summary                Produce an informational summary to standard
+                             error at the end of execution.
+    --samtools FILE          Location of samtools executable
+                             [default $samtools]
+    --verbose                Print informational messages
+    --help, -?               help message
+
+";
+
+    print_usage_and_exit($usage, "") if not @ARGV;
+    GetOptions(""                   => \$o_stdin,
+               "fasta=s"            => \$o_fasta,
+               "indel-frac=f"       => \$o_indelfrac,
+               "indel-min-cov=i"    => \$o_indelmincov,
+               "include-bad-indels" => \$o_includebadindels,
+               "mapping-quality=f"  => \$o_mappingquality,
+               "max-indel-size=i"   => \$o_maxindelsize,
+               "all-reads"          => \$o_allreads,
+               "all-bases"          => \$o_allbases,
+               "samtools=s"         => \$o_samtools,
+               "verbose"            => \$o_verbose,
+               "help|?"             => \$o_help
+    ) or print_usage_and_exit($usage, "unknown option");
+    print_usage_and_exit($usage, "") if $o_help;
+
+    # find samtools and check version
+    $samtools = $o_samtools if $o_samtools;
+    my $t = qx/$samtools 2>&1/;
+    die "cannot execute '$samtools'" if not defined $t;
+    $t =~ m/Version: ([0-9.]+)/;  # finds version string containing just numbers and '.'
+    $t = $1;
+    #print STDERR "Version of samtools determined to be '$t'\n";
+    die "$samtools version ($t) too low, must be >= 0.1.19" if $t =~ m/^0\./ and $t ne '0.1.19';
+
+    die "unknown --mode" if not defined($mode_values{lc($o_mode)});
+    $o_mode = $mode_values{lc($o_mode)};
+    -f $o_fasta or die "cannot find reference file: $o_fasta";
+    my @BAM = grep { -f or die "cannot find BAM: $_" } @ARGV;
+    my $n_BAM = scalar(@BAM);
+
+    # set up samtools argument list
+    my $samtools_args = "-s -B -d 10000 -L 10000";
+    $samtools_args .= " $samtools_filterflags" if not $o_allreads;
+    $min_mapqual = 0 if $o_allreads;
+    $samtools_args .= " -q $min_mapqual";
+    $min_basequal = 0 if $o_allbases;
+    $samtools_args .= " -Q $min_basequal";
+    # open samtools on a pipe
+    my $samtools_pipe = "$samtools mpileup $samtools_args -f $o_fasta ".join(" ", @BAM);
+    $samtools_pipe .= ($o_verbose ? "" : " 2>/dev/null") . " |";
+    print STDERR "samtools pipe command: '$samtools_pipe'\n" if $o_verbose;
+    open(PILEUP, $samtools_pipe) or die "Could not initiate samtools pipe: $!";
+
+    print STDOUT "#assembly:$o_fasta\n";
+
+    while (<PILEUP>) {
+        next if m/^#/;
+        chomp;
+        my @l = split /\t/;
+        my ($ref, $pos, $refcall, $cvg, $base, $qual, $mapqual) = merge_pileup_columns(\@l);
+        die "Coverage contains non-numeric values: $cvg" if $cvg !~ /^[[:digit:]]+$/;
+        if ($refcall eq "*") {
+            print STDERR "skipping reference deletion '*', should this happen??\n";
+            next; # skip indel lines
+        }
+        # code modified from https://github.com/douglasgscofield/bioinfo/tree/master/pileVar
+        my %indels;
+        my %indel_ops;
+        my %indel_lengths;
+        my $in_reads = 0;
+        my $del_reads = 0;
+        my $mean_mapQ = 0;
+        my $n_bases;
+        if ($base =~ m/[\$\^\+-]/) {
+            $base =~ s/\^.//g; #removing the start of the read segement mark
+            $base =~ s/\$//g; #removing end of the read segment mark
+            while ($base =~ m/([\+-]){1}(\d+)/g) {
+                my $indel_type = $1;
+                my $indel_len = $2;
+                if ($indel_len > $o_maxindelsize) { # problem with pileup line?
+                    print STDERR "line $. indel too big, $indel_len\n";
+                    next;
+                }
+                # remove indel info from read base field
+                $base =~ s/([\+-]{1}$indel_len.{$indel_len})//;
+                my $indel_contents = $1;
+                ++$indels{"indel, $indel_type, $indel_len bases, $indel_contents"};
+                ++$indel_lengths{($indel_type eq "+" ? +$indel_len : -$indel_len)};
+                ++$indel_ops{uc($indel_contents)};
+                ++$in_reads if $indel_type eq "+";
+                ++$del_reads if $indel_type eq "-";
+            }
+            $n_bases = length($base);
+            die "n bases $n_bases != number of base qualities" if $n_bases != length($qual);
+            my $qsum = 0;
+            map { $qsum += (ord($_) - $mapQ_base) } split //, $mapqual;
+            $mean_mapQ = sprintf("%.1f", $qsum / length($mapqual)) + 0.0;
+            next if $o_mappingquality and $mean_mapQ < $o_mappingquality;
+        }
+        my $indel_reads = $in_reads + $del_reads;
+        next if $indel_reads == 0;  # no indel
+        my $indel_frac_pos = $indel_reads / $n_bases;
+        my $indel_qual = ($indel_frac_pos >= $o_indelfrac and
+                          $indel_reads >= $o_indelmincov and
+                          scalar(keys %indel_lengths) == 1 and
+                          scalar(keys %indel_ops) == 1) ? "good" : "bad";
+
+        next if not $o_includebadindels and $indel_qual eq "bad";
+        my @out;
+        push @out, ($ref, $pos, $refcall, $cvg, "indel");
+        push @out, $indel_qual;
+        push @out, (sprintf "%.4f", $indel_frac_pos);
+        push @out, join(",", keys %indel_lengths);
+        push @out, join(",", keys %indel_ops);
+        push @out, $in_reads + $del_reads;
+        push @out, $mean_mapQ;
+        ++$n_targets;
+    	print STDOUT join("\t", @out), "\n";
+    }
+    print STDERR "$0 $command: $n_targets targets generated for assembly '$o_fasta'\n" if $o_verbose;
+    close PILEUP;
+}
+
+################
+
+sub advance_to_seq($$$);
+
+# One of the things I don't want to do is use Bio::Seq::LargeSeq, as that
+# appears to dump directly to disk, at least in earlier version of BioPerl.
+# Better to just assemble the sequences into a simple string, we should
+# have the RAM, then pack it into Bio::Seq for writing.
+
+sub indel_apply() {
+    my $o_fasta;
+    my $o_targets;
+    my $o_includebadindels = 0;
+    my $o_skipdeletionverify = 0;
+    my $o_skipsoftmasked = 0;
+    my $o_help = 0;
+    my $n_applied = 0;
+
+    my $usage = "
+$0 indel-apply [ -f FASTA ] [ -t TARGETS ]
+
+Version: ".VERSION."
+
+Apply indel targets to correct an assembly.  The corrected assembly is written
+to standard output.  The order of sequences in the assembly and targets must be
+the same.
+
+OPTIONS
+
+    -f | --fasta FILE        PacBio assembly in Fasta format, to be corrected.
+                             Must be the same assembly used for
+                             '$0 indel-targets'.
+                             If the assembly is not specified, it is determined
+                             from the first line of the target list.
+    -t | --targets TARGETS   List of indel targets to apply, standard output
+                             from '$0 indel-targets -f FILE ...'.  If no
+                             targets are specified, they are read from stdin.
+
+    --include-bad-indels     Apply indels in target set that are marked 'bad'.
+    --skip-deletion-verify   Do not verify that a deletion matches the
+                             sequence at that position in the assembly
+                             [default $o_skipdeletionverify]
+    --skip-softmasked        Do not apply targets to softmasked regions of the
+                             assembly, as determined by use of lowercase
+                             [default $o_skipsoftmasked]
+
+    --verbose                Print informational messages
+    --help, -?               help message
+
+";
+
+    GetOptions("fasta=s"              => \$o_fasta,
+               "targets=s"            => \$o_targets,
+               "include-bad-indels"   => \$o_includebadindels,
+               "skip-deletion-verify" => \$o_skipdeletionverify,
+               "verbose"              => \$o_verbose,
+               "help|?"               => \$o_help
+    ) or print_usage_and_exit($usage, "unknown option");
+    print_usage_and_exit($usage, "") if $o_help;
+
+    # open targets
+    if (not $o_targets) {
+        *TARGETS = *STDIN;
+    } else {
+        open(TARGETS, "<$o_targets") or die "Could not open targets file '$o_targets': $!";
+    }
+    my $target_assembly = <TARGETS>;  # first line is '#assembly:filename'
+    die "'$o_targets' does not contain assembly filename" if $target_assembly !~ m/^#assembly:/;
+    chomp $target_assembly;
+    $target_assembly = substr($target_assembly, 10);  # remove '#assembly:' prefix
+    # open assembly
+    if (not defined $o_fasta) {
+        print STDERR "$0 $command: Opening target assembly '$target_assembly'\n" if not $o_fasta and $o_verbose;
+        $o_fasta = $target_assembly;
+    } elsif ($o_fasta ne $target_assembly) {
+        print STDERR "\n$0 $command: *** Warning: -f and target assembly do not match\n\n";
+    }
+    my $IN = Bio::SeqIO->new(-file => "<$o_fasta", -format => "fasta") or
+                       die "Could not open assembly file '$o_fasta': $!";
+    my $OUT = Bio::SeqIO->new(-fh => \*STDOUT, -format => "fasta") or
+                       die "Could not open output: $!";
+
+    my $seq = $IN->next_seq() or die "Could not read first assembly sequence";
+    my $seq_start = 1;  # position in the original seq
+    my $sequence = "";  # for the actual sequence letters
+    while (<TARGETS>) {
+        next if m/^#/;
+        chomp;
+        my @l = split /\t/;
+        next if $l[5] eq "bad" and not $o_includebadindels;
+        # we now know we are going to apply this indel
+        if ($l[0] ne $seq->id) {
+            # wrap up the old sequence, move to a new seq
+            $sequence .= $seq->subseq($seq_start, $seq->length());
+            $seq->seq($sequence);
+            $OUT->write_seq($seq);
+            $seq = advance_to_seq($IN, $l[0], $OUT) or die "no assembly sequence '$l[0]'";
+            # initiate sequence
+            $sequence = "";
+            $seq_start = 1;
+        }
+        die "pos mismatch ".$seq->id.": seq_start $seq_start > target $l[1]" if $seq_start > $l[1];
+        # update sequence
+        $sequence .= $seq->subseq($seq_start, $l[1]);
+        $seq_start = $l[1] + 1;
+        # if skipping softmasked regions, if this is softmasked just go to the next target
+        my $base = $seq->subseq($seq_start, $seq_start);
+        next if $o_skipsoftmasked and $base ne lc $base;
+        # apply the indel, is it insertion or deletion?
+        my $sign = $l[7] <=> 0;
+        my $size = abs($l[7]);
+        my $indel = substr($l[8], 1 + length($size)); # remove string '+n' or '-n'
+        if ($sign < 0) {
+            # we need to delete from the assembly
+            if (not $o_skipdeletionverify) {  # verify deletion sequence matches
+                my $del = $seq->subseq($seq_start, $seq_start + $size - 1);
+                if ($indel ne uc($del)) {
+                    die "deletion '$indel' mismatch vs assembly ".$seq->id.":$seq_start, '$del'";
+                }
+            }
+            $seq_start += $size;
+        } elsif ($sign > 0) {
+            # we need to insert into the assembly
+            $sequence .= $indel;
+        } else {
+            die "indel sign is 0 at target line $.";
+        }
+        ++$n_applied;
+    }
+    # wrap up final sequences
+    $sequence .= $seq->subseq($seq_start, $seq->length());
+    $seq->seq($sequence);
+    $OUT->write_seq($seq);
+    while (my $s = $IN->next_seq()) {
+        print STDERR "$0 $command: ".$s->id.", no targets\n" if $o_verbose;
+        $OUT->write_seq($s);
+    }
+    print STDERR "$0 $command: $n_applied targets applied to assembly '$o_fasta'\n" if $o_verbose;
+}
+
+sub advance_to_seq($$$) {
+    # if we skip a sequence, output it in its entirety, it has no targets
+    my ($seqin, $seq_name, $seqout) = @_;
+    while (my $s = $seqin->next_seq()) {
+        return $s if $s->id eq $seq_name;
+        print STDERR "$0 $command: ".$s->id.", no targets\n" if $o_verbose;
+        $seqout->write_seq($s);
+    }
+    return 0;
+}
+

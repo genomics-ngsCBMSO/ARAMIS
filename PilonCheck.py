@@ -36,7 +36,7 @@ output4_file = sys.argv[6]
 # Main
 #-----
 
-print ("\tReading & storing Pilon file\n")
+print ("    Reading & storing Pilon file")
 inhandle1  = open(changesPilon_1 , 'r')
 lines1     = inhandle1.readlines()
 inhandle1.close()
@@ -63,7 +63,7 @@ for line in lines1:
     pilon_dic[name][start]['lengthBasePos1'] = lengthBasePos1
     pilon_dic[name][start]['lengthBasePos2'] = lengthBasePos2
 
-print ("\tReading PacBio utilities file & writing ouputs\n")
+print ("    Reading PacBio utilities file & writing ouputs")
 inhandle2  = open(targetsPacBioutilities_1 , 'r')
 outhandle1 = open(output1_file , 'w')
 outhandle2 = open(output2_file , 'w')

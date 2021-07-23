@@ -24,7 +24,7 @@ out_file = pil_file + ".bed"
 inhandle = open(pil_file, 'r')
 outhandle = open(out_file, 'w')
 
-print ("\n\tOpening and reading ", pil_file, "as Pilon changes file ....\n")
+print ("    Opening and reading ", pil_file, "as Pilon changes file ....")
 lines = inhandle.readlines()
 for line in lines:
   newline = re.sub('(:)', ' ', line)
@@ -55,6 +55,6 @@ for line in lines:
 inhandle.close()
 outhandle.close()
 
-print("\n\tOutput file generated: ", out_file, "\n")
+print("    Output file generated: ", out_file)
 print("ALL DONE!!!")
 
