@@ -4,8 +4,7 @@
 
 ## INTRODUCTION
 
-PacBio long reads can be used to generate de novo genome assemblies. However, we have noticed small insertions
-and deletions in those Pacbio-based assemblies, mostly single-base errors and frequently in homopolymer regions. 
+PacBio long reads can be used to generate de novo genome assemblies. However, we have noticed small insertions and deletions in those Pacbio-based assemblies, mostly single-base errors and frequently in homopolymer regions. 
 
 Illumina reads on the other hand show a lower error rate and can be used to correct the possible single-based errors caused by PacBio long reads.
 
@@ -20,7 +19,9 @@ Here we described the pipeline we recommend in order to obtain a new corrected a
 
 ## CITATION
 
+Thank you for using ARAMIS. Please, cite:
 
+E Sacristán-Horcajada, S González-de la Fuente, R Peiró-Pastor, F Carrasco-Ramiro, R Amils, J M Requena, J Berenguer, B Aguado, ARAMIS: From systematic errors of NGS long reads to accurate assemblies, Briefings in Bioinformatics, 2021;, bbab170, https://doi.org/10.1093/bib/bbab170
   
 ## REQUIREMENTS
 
@@ -44,6 +45,8 @@ This pipeline requires the following dependences:
 
 * [R](https://www.r-project.org/)
 
+Picard, Pilon and PacBio-utilites are included in the folder 'dependencies' and do not need to be installed.
+
 ### R Packages
 
 We recommend installing R packages manually.
@@ -57,45 +60,35 @@ install.packages("cowplot")
 install.packages("grid")
 install.packages("epicontacts")
 install.packages("gridExtra")
-
 ```
 
 ## INSTALLATION
 
-Make sure you have installed all the dependencies before try to run the pipeline!
+The downloaded folder contains 2 main scripts and auxiliary scripts needed to do the complete pipeline:
 
-The downloaded folder contains 2 main scripts and a folder with all the additional scripts needed to do the complete pipeline:
-
-*Main programs*
+*Main scripts*
 
 * correction.sh (AKA D'Artagnan)
 * indel_analysis.sh (AKA Aramis)
 
-*scripts/ folder*
+*Auxiliary scripts*
 
 * parser_pilon_bed.py (AKA Athos)
 * PilonCheck.py (AKA Porthos)
 * combine_info.py (AKA Richelieu)
 * plot_generation.R (AKA Julieta)
 
-All of the scripts must be located in /usr/local/bin and with execution permission:
+ARAMIS's folder should be included in the path (we strongly recommend to add it permanently to /home/$USER/.bashrc) and the script must have execution permission:
 
 ```
+export PATH="$PATH:/path/to/ARAMIS/" # Include in .bashrc
 cd ARAMIS/
 chmod -R +x ./
-sudo cp correction.sh indel_analysis.sh scripts/parser_pilon_bed.py scripts/PilonCheck.py scripts/combine_info.py scripts/plot_generation.R /usr/local/bin
-
 ```
 
+The script correction.sh assumes that the location of the .jar files of Picard Tools and Pilon, and PacBio-utilities is the folder dependencies. Please, do not erase this folder.
 
-The script correction.sh assumes that the path to the executables .jar files of Picard Tools and Pilon is:
-
-/home/$USER/picard.jar (or ~/picard.jar)
-
-/home/$USER/pilon.jar (or ~/pilon.jar)
-
-If this is not true, modify the correspondant lines in the script indicating the correct path for each software, 
-or add them as parameters when running the pipeline (--picard_path and --pilon_path)
+In case you want to use a different Picard or Pilon executable, add them as parameters when running the pipeline (--picard_path and --pilon_path)
 
 
 ## USAGE
@@ -114,14 +107,17 @@ All of the input files for all the scripts MUST be in the work directory.
 correction.sh  -a PacBio.fasta -b Illumina.bam -i 0.5 -p prefix
 
 OPTIONS
-    -a  | --assembly_file     PacBio assembly in Fasta format (REQUIRED)
-    -b  | --alignment_file    Input alignment in BAM (sorted) format (REQUIRED)
-    -i  | --indel_fraction    Do not report indels at a position if the fraction of reads containing them is below this number FLOAT
-    -pt | --picard_path       If picard.jar is not in the path /home/$USER , please indicate the correct path with this option 
-    -pl | --pilon_path        If pilon.jar is not in the path /home/$USER , please indicate the correct path with this option 
-    -w  | --warnings          Alternative pipeline after manual correction of indels flags as warning
-    -p  | --prefix            Prefix for output files
-    -h  | --help              Display help
+    -a  | --assembly_file   PacBio assembly in Fasta format (REQUIRED).
+    -b  | --alignment_file  Input alignment in BAM (sorted) format (REQUIRED).
+    -i  | --indel_fraction  Do not report indels at a position if the fraction of reads containing them is below FLOAT.
+    -pt | --picard_path     To indicate a different path for picard (default: dependencies folder).
+    -pl | --pilon_path      To indicate a different path for picard (default: dependencies folder).
+    -w  | --warnings        Alternative pipeline after manual correction of indels flags as warning.
+    -p  | --prefix          Prefix for output files (default: standard).
+    -f  | --force           Option to force recomputation from the beginning (default: Inactive). Must be added at the end.
+    -h  | --help            Display help.
+    -c  | --citation        Display citation.
+
 
 ```
 
@@ -160,7 +156,7 @@ This step will generate 1 folder:
 3. Running the tests to generate coverage, gc-skew and homopolymers statistics with their plots
 
 ```
-indel_analysis.sh -a <PacBio assembly fasta file> -b1 <Illumina alignment bam file> -b2 <PacBio alignment bam file> -p <prefix for output files> -t <targets file>
+indel_analysis.sh -a PacBio.fasta -b1 Illumina.bam -b2 PacBio.bam -p prefix -t <targets file>
 
 OPTIONS
     -a  | --assembly_file             PacBio assembly in Fasta format
@@ -190,8 +186,10 @@ This step will generate 1 folder
 ## MAINTAINERS
 
 Current maintainers:
+
  * Eva Sacristán Horcajada (CBMSO) - esacristan@cbm.csic.es
  * Sandra González de la Fuente (CBMSO) - sandra.g@cbm.csic.es
+ * Adrián Gómez Repollés (CBMSO) - adrian.gomez@cbm.csic.es
 
  ## Authors
 
@@ -199,7 +197,7 @@ Current maintainers:
  * Sandra González de la Fuente (CBMSO) - sandra.g@cbm.csic.es
  * Ramón Peiró Pastor (CBMSO) - rpeiro@cbm.csic.es
 
-This pipeline was developed by memebers of the Genomics and NGS Core Facility of the Centro de Biología Molecular Severo-Ochoa (CBMSO, Madrid, Spain),
+This pipeline was developed by members of the Genomics and NGS Core Facility of the Centro de Biología Molecular Severo-Ochoa (CBMSO, Madrid, Spain),
 a joint Center between the Consejo Superior de Investigaciones Científicas (CSIC) (Spanish Research Council) and the Universidad Autónoma de Madrid (UAM). 
 
 

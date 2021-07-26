@@ -13,7 +13,7 @@ function usage()
     echo "  -pt | --picard_path     To indicate a different path for picard (default: dependencies folder)."  
     echo "  -pl | --pilon_path      To indicate a different path for picard (default: dependencies folder)." 
     echo "  -w  | --warnings        Alternative pipeline after manual correction of indels flags as warning."
-    echo "  -p  | --prefix          Prefix for output files (default: standard).\n"
+    echo "  -p  | --prefix          Prefix for output files (default: standard)."
     echo "  -f  | --force           Option to force recomputation from the beginning (default: Inactive). Must be added at the end."
     echo "  -h  | --help            Display help."
     echo "  -c  | --citation        Display citation."
