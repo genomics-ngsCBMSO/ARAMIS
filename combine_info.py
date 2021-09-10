@@ -233,7 +233,7 @@ for chro in sorted(pos_dic.keys()):
 #Generate Stats File
 
 col1 = ["Total Homopolymers", "Total Indels", "Indels in Homopolymers", "% of Homopolymers Affected","A homopolymers with indel", "% of A Homopolymers Affected", "T homopolymers with indel", "% of T Homopolymers Affected","G homopolymers with indel", "% of G Homopolymers Affected","C homopolymers with indel", "% of C Homopolymers Affected"]
-col2 = [hom_count, indel_count, homyes_count, ((homyes_count/hom_count)*100), A_count, ((A_count/totalA)*100), T_count, ((T_count/totalT)*100), G_count, ((G_count/totalA)*100), C_count, ((C_count/totalA)*100)]
+col2 = [hom_count, indel_count, homyes_count, ((homyes_count/hom_count)*100), A_count, ((A_count/totalA)*100), T_count, ((T_count/totalT)*100), G_count, ((G_count/totalG)*100), C_count, ((C_count/totalC)*100)]
 
 writer = csv.writer(outhandle3, delimiter='\t')
 writer.writerows(zip(col1,col2))

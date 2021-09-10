@@ -75,17 +75,17 @@ while [[ "$1" > 0 ]]; do
       WARNINGS=$1
       shift
       ;;
-    -p|--prefix)
+    -p| --prefix)
       shift
       PREFIX=$1
       shift
       ;;
-    -f|--force)
+    -f| --force)
       shift
       FORCE=true
       shift
       ;;
-    -h|--help)
+    -h| --help)
       usage
       exit
       ;;
@@ -156,6 +156,7 @@ type samtools 2> /dev/null 1>&2
 if [ $? != 0 ]
 then
   printf "\nERROR: samtools missing. Install the required dependencies. We recommend installing a conda environment.\n"
+  exit
 else
   SAMTOOLS=$(type -p samtools)
 fi
@@ -165,6 +166,7 @@ type perl 2> /dev/null 1>&2
 if [ $? != 0 ]
 then
   printf "\nERROR: Perl missing. Install the required dependencies."
+  exit
 fi
 
 # Check BioPerl

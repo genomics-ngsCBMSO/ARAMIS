@@ -3,19 +3,19 @@
 ##CLEAN AND CHECK LIBRARIES
 
 
-print(" Checking if all libraries are installed ")
+message(" Checking if all libraries are installed ")
 rm(list=ls())
 
 r = getOption("repos")
 r["CRAN"] = "http://cran.us.r-project.org"
 options(repos = r)
 
-if ("optparse" %in% row.names(installed.packages())  == FALSE) install.packages("optparse")
-if ("ggplot2" %in% row.names(installed.packages())  == FALSE) install.packages("ggplot2")
-if ("cowplot" %in% row.names(installed.packages())  == FALSE) install.packages("cowplot")
-if ("grid" %in% row.names(installed.packages())  == FALSE) install.packages("grid")
-if ("epicontacts" %in% row.names(installed.packages())  == FALSE) install.packages("epicontacts")
-if ("gridExtra" %in% row.names(installed.packages())  == FALSE) install.packages("gridExtra")
+if ("optparse" %in% row.names(installed.packages())  == FALSE) message("Installing optparse"); install.packages("optparse", quiet=T)
+if ("ggplot2" %in% row.names(installed.packages())  == FALSE) message("Installing ggplot2"); install.packages("ggplot2", quiet=T)
+if ("cowplot" %in% row.names(installed.packages())  == FALSE) message("Installing cowplot"); install.packages("cowplot", quiet=T)
+if ("grid" %in% row.names(installed.packages())  == FALSE) message("Installing grid"); install.packages("grid", quiet=T)
+if ("epicontacts" %in% row.names(installed.packages())  == FALSE) message("Installing epicontacts"); install.packages("epicontacts", quiet=T)
+if ("gridExtra" %in% row.names(installed.packages())  == FALSE) message("Installing gridExtra"); install.packages("gridExtra", quiet=T)
 library("optparse")
 library("ggplot2")
 library("cowplot")
@@ -56,7 +56,7 @@ if (is.null(opt$file)){
 
 ## READING DATA
 
-print(" Reading data ")
+message("Reading data")
 
 #ALL INFO FILE
 info <- read.table(opt$file, sep="\t", header=T)
@@ -64,7 +64,7 @@ info <- read.table(opt$file, sep="\t", header=T)
 emptycols <- sapply(info, function (k) all(is.na(k)))
 
 if (length(colnames(info[emptycols])) != 0) {
-   print(paste("WARNING: ", colnames(info[emptycols]),"IS EMPTY!"))
+   message(paste("WARNING: ", colnames(info[emptycols]),"IS EMPTY!"))
    }
 
 homtype <- as.data.frame(table(info$Type,info$Length))
@@ -83,7 +83,7 @@ colnames(gcs) <- c("Chromosome","Position","GC_Skew","Cumulative_GC_Skew")
 
 ## Generar los plots
 
-print(" Generating plots ")
+message("Generating plots")
 
 if (nrow(size) != 1) {
   G <- ggplot(homtype, aes(x=Length, y=Number, fill=Type)) + geom_bar(stat="identity", position=position_dodge()) 
@@ -96,7 +96,7 @@ if (nrow(size) != 1) {
 for (i in 1:nrow(size)) {
   genome.size <- size[i,2]
   var <- size[i,1]
-  print(paste("Plots will be generated for", var))
+  message(paste("Plots will be generated for", var))
   chro <-  subset(info, Chromosome == as.character(var))
   if (nrow(chro) == 0)
   {next}
@@ -126,12 +126,12 @@ for (i in 1:nrow(size)) {
   chro_cov <-  subset(cov, Chromosome == as.character(var))
   if (nrow(chro_cov) == 0)
   {next}
-  out2 <- ggplot(chro_cov, aes(Position, Indel_fraction)) + xlim(0, genome.size) + geom_point(aes(colour=chro_cov$Platform)) 
+  out2 <- ggplot(chro_cov, aes(Position, Indel_fraction)) + xlim(0, genome.size) + geom_point(aes(colour=Platform)) 
   out2 <- out2 + labs(x="Nucleotide Position", y ="Indel Fraction", title =paste("Indel fraction by Sequencing Technology \n across", var), colour="Sequencing Technology") 
   out2 <- out2 + geom_hline(yintercept=as.numeric(0.5),col="darkgrey") + theme_bw()
   ggsave(filename=paste("Indel_fraction_",var,".png", sep=""), plot=out2, device="png", width = 15, height = 8, dpi=352)
   ggsave(filename=paste("Indel_fraction_",var,".pdf", sep=""), plot=out2, device="pdf", width = 15, height = 8, dpi=352)
 }
 
-print(" All plots done!!! ")
+message("All plots done!!!")
 
