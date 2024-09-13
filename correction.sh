@@ -370,7 +370,7 @@ else
 
 
   sed '2,$d' pacbio_utilities/targets_All_${INDEL_FRAC}.txt > pacbio_utilities/header
-  cat pacbio_utilities/targets_onlygood_${INDEL_FRAC}.txt pacbio_utilities/pilon_common.txt | sort -k 2,2n > pacbio_utilities/targets_final_${PREFIX}.txt
+  cat pacbio_utilities/targets_onlygood_${INDEL_FRAC}.txt pacbio_utilities/pilon_common.txt | sort -k1,1 -k2,2n > pacbio_utilities/targets_final_${PREFIX}.txt
 
   # Create list file with contigs names.
   grep '>' $ASSEMBLY |sed 's/>//g' > pacbio_utilities/list.txt
