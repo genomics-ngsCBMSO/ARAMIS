@@ -15,7 +15,7 @@ Here we described the pipeline we recommend in order to obtain a new corrected a
    Unpublished yet.
 
  * To submit bug reports and feature suggestions, or to track changes:
-   genomicangs@cbm.csic.es
+   sabio@cbm.csic.es
 
 ## CITATION
 
