@@ -225,7 +225,7 @@ OPTIONS
     my $n_BAM = scalar(@BAM);
 
     # set up samtools argument list
-    my $samtools_args = "-s -B -d 10000 -L 10000";
+    my $samtools_args = "-s -B -d 10000";
     $samtools_args .= " $samtools_filterflags" if not $o_allreads;
     $min_mapqual = 0 if $o_allreads;
     $samtools_args .= " -q $min_mapqual";
