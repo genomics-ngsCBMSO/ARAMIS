@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use this pipeline, please cite it as below."
+message: "If you use this pipeline, please cite the preferred-citation article below."
 authors:
   - family-names: "Sacristán-Horcajada"
     given-names: "Eva"
@@ -19,3 +19,28 @@ authors:
 title: "Accurate long-Reads Assembly correction Method for Indel errorS (ARAMIS)"
 version: 1.0.0
 date-released: 2021-09-10
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Sacristán-Horcajada"
+      given-names: "E."
+    - family-names: "González-de la Fuente"
+      given-names: "S."
+    - family-names: "Peiró-Pastor"
+      given-names: "R."
+    - family-names: "Carrasco-Ramiro"
+      given-names: "F."
+    - family-names: "Amils"
+      given-names: "R."
+    - family-names: "Requena"
+      given-names: "J. M."
+    - family-names: "Berenguer"
+      given-names: "J."
+    - family-names: "Aguado"
+      given-names: "B."
+  title: "ARAMIS: From systematic errors of NGS long reads to accurate assemblies"
+  journal: "Briefings in Bioinformatics"
+  year: 2021
+  volume: 22
+  issue: 6
+  doi: "10.1093/bib/bbab170"
