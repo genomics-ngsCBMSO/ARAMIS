@@ -194,14 +194,14 @@ This step will generate 1 folder
 
 Current maintainers:
 
- * Eva Sacristán Horcajada (CBMSO) - esacristan@cbm.csic.es
- * Sandra González de la Fuente (CBMSO) - sandra.g@cbm.csic.es
+ * Eva Sacristán Horcajada (CBM) - esacristan@cbm.csic.es
+ * Sandra González de la Fuente (CBM) - sandra.g@cbm.csic.es
 
  ## Authors
 
- * Eva Sacristán Horcajada (CBMSO) - esacristan@cbm.csic.es
- * Sandra González de la Fuente (CBMSO) - sandra.g@cbm.csic.es
- * Ramón Peiró Pastor (CBMSO) - rpeiro@cbm.csic.es
+ * Eva Sacristán Horcajada (CBM) - esacristan@cbm.csic.es
+ * Sandra González de la Fuente (CBM) - sandra.g@cbm.csic.es
+ * Ramón Peiró Pastor (INIA) - ramon.peiro@inia.csic.es
 
 This pipeline was developed by members of the Genomics and NGS Core Facility of the Centro de Biología Molecular Severo-Ochoa (CBMSO, Madrid, Spain),
 a joint Center between the Consejo Superior de Investigaciones Científicas (CSIC) (Spanish Research Council) and the Universidad Autónoma de Madrid (UAM). 
