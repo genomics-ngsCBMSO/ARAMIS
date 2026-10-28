@@ -196,7 +196,6 @@ Current maintainers:
 
  * Eva Sacristán Horcajada (CBMSO) - esacristan@cbm.csic.es
  * Sandra González de la Fuente (CBMSO) - sandra.g@cbm.csic.es
- * Adrián Gómez Repollés (CBMSO) - adrian.gomez@cbm.csic.es
 
  ## Authors
 
