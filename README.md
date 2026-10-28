@@ -19,11 +19,16 @@ Here we described the pipeline we recommend in order to obtain a new corrected a
 
 ## CITATION
 
-Thank you for using ARAMIS. Please, cite:
+Thank you for using ARAMIS. Please cite our work:
 
-E Sacristán-Horcajada, S González-de la Fuente, R Peiró-Pastor, F Carrasco-Ramiro, R Amils, J M Requena, J Berenguer, B Aguado, ARAMIS: From systematic errors of NGS long reads to accurate assemblies, Briefings in Bioinformatics, 2021;, bbab170, https://doi.org/10.1093/bib/bbab170
+### Journal Article
+Sacristán-Horcajada, E., González-de la Fuente, S., Peiró-Pastor, R., Carrasco-Ramiro, F., Amils, R., Requena, J. M., Berenguer, J., & Aguado, B. **ARAMIS: From systematic errors of NGS long reads to accurate assemblies**, *Briefings in Bioinformatics*, 2021, 22(6), bbab170.  
+👉 [https://doi.org/10.1093/bib/bbab170](https://doi.org/10.1093/bib/bbab170)
 
+### Software Repository (Zenodo)
+If you want to cite this specific software version/pipeline:  
 [![DOI](https://zenodo.org)](https://doi.org/10.5281/zenodo.23725940)
+
   
 ## REQUIREMENTS
 
