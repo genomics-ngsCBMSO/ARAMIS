@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this pipeline, please cite it as below."
+authors:
+  - family-names: "Sacristán-Horcajada"
+    given-names: "Eva"
+    email: "esacristan@cbm.csic.es"
+    orcid: "https://orcid.org/0000-0002-3063-136X"
+    affiliation: "CBM-CSIC/UAM"
+  - family-names: "González-de la Fuente"
+    given-names: "Sandra"
+    email: "sandra.g@cbm.csic.es"
+    orcid: "https://orcid.org/0000-0002-7470-2983"
+    affiliation: "CBM-CSIC/UAM"
+  - family-names: "Peiró Pastor"
+    given-names: "Ramón"
+    email: "ramon.peiro@inia.csic.es"
+    orcid: "https://orcid.org/0000-0003-2450-2999"
+    affiliation: "INIA-CSIC"
+title: "Accurate long-Reads Assembly correction Method for Indel errorS (ARAMIS)"
+version: 1.0.0
+date-released: 2021-09-10
